@@ -25,12 +25,35 @@ public class Main
     {
         DirectedGraph<String, DefaultEdge> out = new DefaultDirectedGraph<>(DefaultEdge.class);
 
-        //Add all vertices
-        for (Video vid : videos) { out.addVertex(vid.getId()); }
-        //Add all edges
+        //Add all vertices and edges
         for (Video vid : videos) 
         {  
-            for (String rel : vid.getRelated()) { out.addEdge(vid.getId(), rel); }
+            //Make sure vertex does not already exist before adding vertex
+            if (!out.vertexSet().contains(vid.getId())) { out.addVertex(vid.getId()); }
+            //Add edges
+            for (String rel : vid.getRelated()) 
+            { 
+                //Make sure other end of edge exists before adding edge
+                if (!out.vertexSet().contains(rel)) { out.addVertex(rel); }
+                out.addEdge(vid.getId(), rel); 
+            }
+        }
+
+        return out;
+    }
+
+    //Parses multiple files in a dataset
+    private static List<Video> parseDataset (String dataset) throws FileNotFoundException
+    {
+        List<Video> out = new ArrayList<Video>();
+        int count = 0;
+
+        //Loop through ints until file not found
+        while (true) 
+        {
+            try { out.addAll(parseFile(dataset, count)); } 
+            catch (FileNotFoundException e) { break; }
+            count++;
         }
 
         return out;
@@ -40,13 +63,15 @@ public class Main
     private static List<Video> parseFile (String dataset, int fileNum) throws FileNotFoundException
     {
         List<Video> out = new ArrayList<Video>();
+        //Data stored in "data" folder, each dataset is a folder containing int-named .txt files
         File file = new File(".\\data\\" + dataset + "\\" + fileNum + ".txt");
         Scanner scan = new Scanner(file);
 
         while (scan.hasNextLine()) 
         {
+            //Split line into values
             String[] data = scan.nextLine().split("\t");
-
+            //Get basic data
             String id = data[0].trim();
             String uploader = data[1].trim();
             int age = Integer.parseInt(data[2].trim());
@@ -56,8 +81,8 @@ public class Main
             double rate = Double.parseDouble(data[6].trim());
             int ratings = Integer.parseInt(data[7].trim());
             int comments = Integer.parseInt(data[8].trim());
-
-            String[] related = new String[20];
+            //Get related video IDs
+            String[] related = new String[data.length - 9];
             for (int i = 9; i < data.length; i++) 
             {
                 related[i - 9] = data[i].trim();

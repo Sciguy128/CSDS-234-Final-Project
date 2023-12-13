@@ -1,5 +1,6 @@
-package csds234_final_project;
+package csds234_final_project.src.main.java.csds234_final_project;
 
+import org.jgrapht.alg.scoring.KatzCentrality;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -25,7 +26,7 @@ public class Main
         //List<Video> videos = parseFile("0222",0);
         List<Video> videos = parseDataset("0222");
         graph = createGraph(videos);
-/*
+
         //This whole part is a way to view the centrality of nodes in the graph
         //Centrality Measure( Depending on what we want to look for, could be Betweenness, Closeness, EdgeBetweenness, Eigenvector, Harmonic, Katz, or PageRank)
         KatzCentrality<String, DefaultEdge> degreeCentrality = new KatzCentrality<>(graph);
@@ -36,7 +37,11 @@ public class Main
         // Printing the centrality scores
         for (Map.Entry<String, Double> entry : scores.entrySet()) {
             System.out.println("Video ID: " + entry.getKey() + ", Centrality: " + entry.getValue());
-        }*/
+        }
+
+        System.out.println(Collections.max(scores.entrySet(), Map.Entry.comparingByValue()).getKey());
+
+        System.out.println(scores.get(Collections.max(scores.entrySet(), Map.Entry.comparingByValue()).getKey()));
     }
 
     //Create graph of video IDs connected by their related videos
@@ -63,6 +68,7 @@ public class Main
 
         return out;
     }
+
 
     //Parses multiple files in a dataset
     private static List<Video> parseDataset (String dataset) throws FileNotFoundException

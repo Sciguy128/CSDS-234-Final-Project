@@ -1,4 +1,4 @@
-package csds234_final_project;
+package csds234_final_project.src.main.java.csds234_final_project;
 
 public class Video 
 {

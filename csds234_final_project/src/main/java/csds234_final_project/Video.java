@@ -1,6 +1,8 @@
-package csds234_final_project;//.src.main.java.csds234_final_project;
+package csds234_final_project.src.main.java.csds234_final_project;
 
-public class Video 
+import java.util.Arrays;
+
+public class Video
 {
     private String id;
     private String uploader;
@@ -13,7 +15,7 @@ public class Video
     private int comments;
     private String[] related;
 
-    Video (String id, String uploader, int age, String category, int length, 
+    Video (String id, String uploader, int age, String category, int length,
            int views, double rate, int ratings, int comments, String[] related)
     {
         this.id = id;
@@ -38,4 +40,20 @@ public class Video
     public int getRatings () {  return ratings; }
     public int getComments () {  return comments; }
     public String[] getRelated () { return related; }
+
+    @Override
+    public String toString() {
+        return "Video{" +
+                "id='" + id + '\'' +
+                ", uploader='" + uploader + '\'' +
+                ", age=" + age +
+                ", category='" + category + '\'' +
+                ", length=" + length +
+                ", views=" + views +
+                ", rate=" + rate +
+                ", ratings=" + ratings +
+                ", comments=" + comments +
+                ", related=" + Arrays.toString(related) +
+                '}';
+    }
 }

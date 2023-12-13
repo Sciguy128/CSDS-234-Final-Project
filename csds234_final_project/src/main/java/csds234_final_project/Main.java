@@ -1,6 +1,8 @@
-package csds234_final_project;//.src.main.java.csds234_final_project;
+package csds234_final_project.src.main.java.csds234_final_project;
 
 //import org.jgrapht.alg.scoring.KatzCentrality;
+import org.jgrapht.alg.scoring.KatzCentrality;
+import org.jgrapht.alg.scoring.PageRank;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -17,32 +19,85 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.Graph;
 //import org.jgrapht.alg.scoring.*;
 
-public class Main 
+public class Main
 {
     private static DefaultDirectedGraph<String, DefaultEdge> graph;
 
-    public static void main(String[] args) throws FileNotFoundException 
+    public static void main(String[] args) throws FileNotFoundException
     {
-        //Map<String, Video> videos = parseFile("0222",0);
+        //Map<String, Video> videos = parseDataset("0222");
+        Map<String, Video> video1 = parseFile("0222",0);
+        Map<String, Video> video2 = parseFile("0222",1);
+        Map<String, Video> video3 = parseFile("0222",2);
+        Map<String, Video> video4 = parseFile("0222",3);
+        Map<String, Video> video5 = parseFile("0222",4);
+        Map<String, Video> video6 = parseFile("0222",5);
+        graph = createGraph(video1);
+        video1 = null; //here to froce the garabage collector to clean up the heap space
+        graph = updateGraph(video2,graph);
+        video2 = null;
+        graph = updateGraph(video3,graph);
+        video3 = null;
+        graph = updateGraph(video4,graph);
+        video4 = null;
+        graph = updateGraph(video5,graph);
+        video5 = null;
+        //graph = updateGraph(video6,graph);
+        video6 = null;
+        System.out.println(graph.vertexSet().size());
+
+
+
+
+
+
+
+        PageRank<String, DefaultEdge> pRank = new PageRank<>(graph);
+
+        // Calculating PageRank scores
+        Map<String, Double> scores = pRank.getScores();
+
+        // Sort the videos by their PageRank scores in descending order
+        List<Map.Entry<String, Double>> sortedEntries = new ArrayList<>(scores.entrySet());
+        sortedEntries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+
         Map<String, Video> videos = parseDataset("0222");
-        graph = createGraph(videos);
-/*
-        //This whole part is a way to view the centrality of nodes in the graph
-        //Centrality Measure( Depending on what we want to look for, could be Betweenness, Closeness, EdgeBetweenness, Eigenvector, Harmonic, Katz, or PageRank)
-        KatzCentrality<String, DefaultEdge> degreeCentrality = new KatzCentrality<>(graph);
+        // Select the top k videos
+        int k = 10; // Set the value of k as required
+        List<String> topKVideos = new ArrayList<>();
+        for (int i = 0; i < Math.min(k, sortedEntries.size()); i++) {
+            Map.Entry<String, Double> entry = sortedEntries.get(i);
+            topKVideos.add(entry.getKey());
+            System.out.println("Video ID: " + entry.getKey() + ", PageRank: " + entry.getValue() +
+                    "\nVideo Info: " + videos.get(entry.getKey()));
+        }
+    }
 
-        // Calculating centrality scores
-        Map<String, Double> scores = degreeCentrality.getScores();
+    private static DefaultDirectedGraph<String, DefaultEdge> updateGraph (Map<String, Video> videos, DefaultDirectedGraph<String, DefaultEdge> graph)
+    {
+        DefaultDirectedGraph<String, DefaultEdge> out = graph;
 
-        // Printing the centrality scores
-        for (Map.Entry<String, Double> entry : scores.entrySet()) {
-            System.out.println("Video ID: " + entry.getKey() + ", Centrality: " + entry.getValue());
+        //Add all vertices and edges
+        for (String id : videos.keySet())
+        {
+            Video vid = videos.get(id);
+            //Make sure vertex does not already exist before adding vertex
+            if (!out.vertexSet().contains(id)) { out.addVertex(id); }
+            //Add edges if they exist
+            if (vid.getRelated() != null)
+            {
+                for (String rel : vid.getRelated())
+                {
+                    //Make sure other end of edge exists before adding edge
+                    if (!out.vertexSet().contains(rel)) { out.addVertex(rel); }
+                    out.addEdge(id, rel);
+                }
+            }
         }
 
-        System.out.println(Collections.max(scores.entrySet(), Map.Entry.comparingByValue()).getKey());
+        return out;
 
-        System.out.println(scores.get(Collections.max(scores.entrySet(), Map.Entry.comparingByValue()).getKey()));
-        */
     }
 
     //Create graph of video IDs connected by their related videos
@@ -51,19 +106,19 @@ public class Main
         DefaultDirectedGraph<String, DefaultEdge> out = new DefaultDirectedGraph<>(DefaultEdge.class);
 
         //Add all vertices and edges
-        for (String id : videos.keySet()) 
-        {  
+        for (String id : videos.keySet())
+        {
             Video vid = videos.get(id);
             //Make sure vertex does not already exist before adding vertex
             if (!out.vertexSet().contains(id)) { out.addVertex(id); }
             //Add edges if they exist
             if (vid.getRelated() != null)
             {
-                for (String rel : vid.getRelated()) 
-                { 
+                for (String rel : vid.getRelated())
+                {
                     //Make sure other end of edge exists before adding edge
                     if (!out.vertexSet().contains(rel)) { out.addVertex(rel); }
-                    out.addEdge(id, rel); 
+                    out.addEdge(id, rel);
                 }
             }
         }
@@ -79,9 +134,9 @@ public class Main
         int count = 0;
 
         //Loop through ints until file not found
-        while (true) 
+        while (true)
         {
-            try { out.putAll(parseFile(dataset, count)); } 
+            try { out.putAll(parseFile(dataset, count)); }
             catch (FileNotFoundException e) { break; }
             count++;
         }
@@ -97,7 +152,7 @@ public class Main
         File file = new File(".\\data\\" + dataset + "\\" + fileNum + ".txt");
         Scanner scan = new Scanner(file);
 
-        while (scan.hasNextLine()) 
+        while (scan.hasNextLine())
         {
             //Split line into values
             String[] data = scan.nextLine().split("\t");
@@ -119,7 +174,7 @@ public class Main
                 {
                     //Get related video IDs
                     related = new String[data.length - 9];
-                    for (int i = 9; i < data.length; i++) 
+                    for (int i = 9; i < data.length; i++)
                     {
                         related[i - 9] = data[i].trim();
                     }

@@ -1,29 +1,46 @@
 package csds234_final_project;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
-import org.jgrapht.*;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.*;
+import java.util.Scanner;
+
+import org.jgrapht.*;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.scoring.*;
+
 public class Main 
 {
-    private static DirectedGraph<String, DefaultEdge> graph;
+    private static DefaultDirectedGraph<String, DefaultEdge> graph;
 
     public static void main(String[] args) throws FileNotFoundException 
     {
-        List<Video> videos = parseFile("0222", 0);
+        List<Video> videos = parseFile("0222",0);
         graph = createGraph(videos);
+
+        //This whole part is a way to view the centrality of nodes in the graph
+        //Centrality Measure( Depending on what we want to look for, could be Betweenness, Closeness, EdgeBetweenness, Eigenvector, Harmonic, Katz, or PageRank)
+        KatzCentrality<String, DefaultEdge> degreeCentrality = new KatzCentrality<>(graph);
+
+        // Calculating centrality scores
+        Map<String, Double> scores = degreeCentrality.getScores();
+
+        // Printing the centrality scores
+        for (Map.Entry<String, Double> entry : scores.entrySet()) {
+            System.out.println("Video ID: " + entry.getKey() + ", Centrality: " + entry.getValue());
+        }
     }
 
     //Create graph of video IDs connected by their related videos
-    private static DirectedGraph<String, DefaultEdge> createGraph (List<Video> videos)
+    private static DefaultDirectedGraph<String, DefaultEdge> createGraph (List<Video> videos)
     {
-        DirectedGraph<String, DefaultEdge> out = new DefaultDirectedGraph<>(DefaultEdge.class);
+        DefaultDirectedGraph<String, DefaultEdge> out = new DefaultDirectedGraph<>(DefaultEdge.class);
 
         //Add all vertices and edges
         for (Video vid : videos) 

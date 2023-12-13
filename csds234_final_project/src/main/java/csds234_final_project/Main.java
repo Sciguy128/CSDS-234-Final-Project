@@ -1,6 +1,6 @@
-package csds234_final_project.src.main.java.csds234_final_project;
+package csds234_final_project;//.src.main.java.csds234_final_project;
 
-import org.jgrapht.alg.scoring.KatzCentrality;
+//import org.jgrapht.alg.scoring.KatzCentrality;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 
@@ -23,10 +23,10 @@ public class Main
 
     public static void main(String[] args) throws FileNotFoundException 
     {
-        //List<Video> videos = parseFile("0222",0);
-        List<Video> videos = parseDataset("0222");
+        //Map<String, Video> videos = parseFile("0222",0);
+        Map<String, Video> videos = parseDataset("0222");
         graph = createGraph(videos);
-
+/*
         //This whole part is a way to view the centrality of nodes in the graph
         //Centrality Measure( Depending on what we want to look for, could be Betweenness, Closeness, EdgeBetweenness, Eigenvector, Harmonic, Katz, or PageRank)
         KatzCentrality<String, DefaultEdge> degreeCentrality = new KatzCentrality<>(graph);
@@ -42,18 +42,20 @@ public class Main
         System.out.println(Collections.max(scores.entrySet(), Map.Entry.comparingByValue()).getKey());
 
         System.out.println(scores.get(Collections.max(scores.entrySet(), Map.Entry.comparingByValue()).getKey()));
+        */
     }
 
     //Create graph of video IDs connected by their related videos
-    private static DefaultDirectedGraph<String, DefaultEdge> createGraph (List<Video> videos)
+    private static DefaultDirectedGraph<String, DefaultEdge> createGraph (Map<String, Video> videos)
     {
         DefaultDirectedGraph<String, DefaultEdge> out = new DefaultDirectedGraph<>(DefaultEdge.class);
 
         //Add all vertices and edges
-        for (Video vid : videos) 
+        for (String id : videos.keySet()) 
         {  
+            Video vid = videos.get(id);
             //Make sure vertex does not already exist before adding vertex
-            if (!out.vertexSet().contains(vid.getId())) { out.addVertex(vid.getId()); }
+            if (!out.vertexSet().contains(id)) { out.addVertex(id); }
             //Add edges if they exist
             if (vid.getRelated() != null)
             {
@@ -61,7 +63,7 @@ public class Main
                 { 
                     //Make sure other end of edge exists before adding edge
                     if (!out.vertexSet().contains(rel)) { out.addVertex(rel); }
-                    out.addEdge(vid.getId(), rel); 
+                    out.addEdge(id, rel); 
                 }
             }
         }
@@ -71,15 +73,15 @@ public class Main
 
 
     //Parses multiple files in a dataset
-    private static List<Video> parseDataset (String dataset) throws FileNotFoundException
+    private static Map<String, Video> parseDataset (String dataset) throws FileNotFoundException
     {
-        List<Video> out = new ArrayList<Video>();
+        Map<String, Video> out = new HashMap<String, Video>();
         int count = 0;
 
         //Loop through ints until file not found
         while (true) 
         {
-            try { out.addAll(parseFile(dataset, count)); } 
+            try { out.putAll(parseFile(dataset, count)); } 
             catch (FileNotFoundException e) { break; }
             count++;
         }
@@ -88,9 +90,9 @@ public class Main
     }
 
     //Parses tab-seperated values into Video objects
-    private static List<Video> parseFile (String dataset, int fileNum) throws FileNotFoundException
+    private static Map<String, Video> parseFile (String dataset, int fileNum) throws FileNotFoundException
     {
-        List<Video> out = new ArrayList<Video>();
+        Map<String, Video> out = new HashMap<String, Video>();
         //Data stored in "data" folder, each dataset is a folder containing int-named .txt files
         File file = new File(".\\data\\" + dataset + "\\" + fileNum + ".txt");
         Scanner scan = new Scanner(file);
@@ -123,7 +125,7 @@ public class Main
                     }
                 }
 
-                out.add(new Video(id, uploader, age, category, length, views, rate, ratings, comments, related));
+                out.put(id, new Video(id, uploader, age, category, length, views, rate, ratings, comments, related));
             }
         }
 
